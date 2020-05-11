@@ -19,6 +19,8 @@ class TPUSim(object):
         self.program = open(program_filename, 'rb')
         self.weight_memory = np.load(dram_filename)
         self.host_memory = np.load(hostmem_filename)
+        print(self.weight_memory)
+        print(self.host_memory)
         if not args.raw:
             assert self.weight_memory.dtype == np.int8, 'DRAM weight mem is not 8-bit ints'
             assert self.host_memory.dtype == np.int8, 'Hostmem not 8-bit ints'
@@ -81,11 +83,11 @@ class TPUSim(object):
             vfunc = np.vectorize(lambda x: 0 * x if x < 0. else x)
         elif flag & isa.FUNC_SIGMOID_MASK:
             print('  SIGMOID')
-            vfunc = np.vectorize(lambda x: int(255./(1.+exp(-x))))
+            vfunc = np.vectorize(lambda x: int(255./(1.+np.exp(-x))))
         else:
             vfunc = np.vectorize(lambda x: x)
             #raise Exception('(╯°□°）╯︵ ┻━┻ bad activation function!')
-
+        print(result)
         result = vfunc(result)
 
         # downsample/normalize if needed
@@ -123,6 +125,7 @@ class TPUSim(object):
         if not args.raw:
             inp = inp.astype(np.int32)
             weight_mat = weight_mat.astype(np.int32)
+        print('input size: {} weight size: {}'.format(inp.shape, weight_mat.shape))
         out = np.matmul(inp, weight_mat)
         print('MMC output shape: {}'.format(out.shape))
         overwrite = isa.OVERWRITE_MASK & flags

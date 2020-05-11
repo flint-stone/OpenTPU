@@ -19,18 +19,20 @@ def train(path, lpath):
     X = np.load(path)
     y = np.load(lpath)
 
-    print 'X: {}'.format(X)
-    print 'y: {}'.format(y)
+    print('X: {}'.format(X))
+    print('y: {}'.format(y))
     # seed random numbers to make calculation
     # deterministic (just a good practice)
     np.random.seed(1)
 
     # initialize weights randomly with mean 0
     syn0 = np.random.random((X.shape[-1], y.shape[-1]))
-
+    print('syn0 pre: {}'.format(syn0))
+    print(str(X.shape[-1]))
+    print(str(y.shape))
     nonlin = sigmoid
 
-    for iter in xrange(10000):
+    for iter in range(10000):
 
         # forward propagation
         l0 = X
@@ -45,22 +47,37 @@ def train(path, lpath):
 
         # update weights
         syn0 += np.dot(l0.T,l1_delta)
-    print 'syn0: {}'.format(syn0)
-    print 'l1: {}'.format(l1)
-    with open('simple_nn_gt', 'w') as f:
+    print('syn0: {}'.format(syn0))
+    print('l1: {}'.format(l1))
+    with open('simple_nn_gt', 'wb') as f:
         pickle.dump((l1, syn0), f)
         f.close()
-    
-    syn0 = float2byte(syn0)
+    syn0 = float2byte(syn0)   
+    print("syn0 shape " +str(syn0.shape))
+    print("syn0 post " + str(syn0))
     gen_mem('simple_nn_weight_dram', syn0)
 
 args = None
 
 def float2byte(mat):
     pos_mat = np.vectorize(lambda x: np.abs(x))(mat)
+    print("---------------")
+    print(mat)
+    print(pos_mat)
     max_w = np.amax(pos_mat)
     mat = np.vectorize(lambda x: (127 * x/max_w).astype(np.int8))(mat)
-    return mat.reshape(1, 8, 8)
+    mat = mat.flatten()
+    print(mat)
+    print("---------------")
+    result = np.zeros(64)
+    
+    result[:mat.shape[0]] = mat
+    print(result)
+    result =result.reshape(8, 8)
+    result = result.transpose()
+    result = np.vectorize(lambda x: (127 * x/max_w).astype(np.int8))(result)
+    #return mat.reshape(1, 8, 8)
+    return result.reshape(1, 8, 8)
 
 def parse_args():
     global args

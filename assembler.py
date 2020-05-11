@@ -127,7 +127,7 @@ def assemble(path, n):
 
         if opcode == OPCODE2BIN['NOP'][0]:
             instr = format_instr(op=opcode, flags=0, length=0, addr=0, ubaddr=0)
-        elif opcode == OPCODE2BIN['HLT'][0]:
+        elif (opcode == OPCODE2BIN['HLT'][0]) or (opcode == OPCODE2BIN['SYNC'][0])  :
             instr = format_instr(op=opcode, flags=0, length=0, addr=0, ubaddr=0)
         elif opcode == OPCODE2BIN['RW'][0]:
             # RW instruction only has only operand (weight DRAM address)
@@ -137,6 +137,7 @@ def assemble(path, n):
             instr = format_instr(op=opcode, flags=flag, length=operands[2], addr=operands[0], ubaddr=operands[1])
         else:
             # WHM and MMC have UB-addr as their source field
+            print(opcode)
             instr = format_instr(op=opcode, flags=flag, length=operands[2], addr=operands[1], ubaddr=operands[0])
 
         bin_code.write(instr.to_bytes(14, byteorder=ENDIANNESS))
